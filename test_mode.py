@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import math
 from transformers import AutoModel, AutoTokenizer
 from PIL import Image
-import matplotlib.pyplot as plt
 import easyocr
 import numpy as np
 import re
@@ -57,24 +56,6 @@ def preprocess_text(text):
 # =========================
 def ocr_extract_text(image_path, confidence_threshold=0.6):
     reader = easyocr.Reader(['en', 'tl'], gpu=torch.cuda.is_available())
-    # # preprocess image for ocr
-    # image = cv2.cvtColor(image_path, cv2.COLOR_RGB2GRAY)
-    # # image = cv2.GaussianBlur(image,(5,5),0)
-    
-    # result = reader.readtext(image, detail=1, paragraph=False, width_ths=0.7, height_ths=0.7)
-
-    # # Extract text and confidence scores
-    # texts = []
-    # confidences = []
-    
-    # for detection in result:
-    #     bbox, text, confidence = detection
-    #     texts.append(text)
-    #     confidences.append(confidence)
-    # final_text = " ".join(texts)
-    # preprocess_txt = preprocess_text(final_text)
-    # avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
-    # return final_text, preprocess_txt, avg_confidence
 
     # Convert to grayscale
     gray = cv2.cvtColor(image_path, cv2.COLOR_RGB2GRAY)
@@ -369,72 +350,3 @@ def run_inference(image_path):
         'confidence': confidence
     }
 
-
-# =========================
-# 7. Run as main
-# =========================
-# if __name__ == "__main__":
-#     # Example: load image from path
-#     IMAGE_PATH = "backend/OIP (1).jfif"
-
-#     # test_dimension_sensitivity(IMAGE_PATH)
-
-#     result = run_inference(IMAGE_PATH)
-
-#     # Print results
-#     print("Original Image Size:", result['original_size'])
-#     print("Prediction:", result['prediction'])
-#     print("Probabilities:", result['probabilities'])
-#     print("Raw OCR Text:", result['raw_text'])
-#     print("Clean OCR Text:", result['clean_text'])
-#     print("OCR Confidence:", result['confidence'])
-
-
-#     # Preprocess image
-#     pil_img = Image.open(IMAGE_PATH).convert("RGB")
-#     img_tensor = resize_normalize_image(pil_img).to(device)
-
-#     # -----------------------------
-#     # Generate ResNet heatmap
-#     # -----------------------------
-#     features = {}
-#     def hook_fn(module, input, output):
-#         features['value'] = output.detach()
-
-#     last_conv = model.image_encoder[-1]
-#     hook_handle = last_conv.register_forward_hook(hook_fn)
-
-#     with torch.no_grad():
-#         _ = model(img_tensor, 
-#                 input_ids=torch.zeros(1,1, dtype=torch.long, device=device), 
-#                 attention_mask=torch.ones(1,1, dtype=torch.long, device=device))
-
-#     hook_handle.remove()
-
-#     feat_tensor = features['value']
-#     heatmap_grid = feat_tensor[0].mean(dim=0).cpu().numpy()
-#     heatmap_grid = (heatmap_grid - heatmap_grid.min()) / (heatmap_grid.max() - heatmap_grid.min())
-#     heatmap_resized = np.uint8(255 * heatmap_grid)
-#     heatmap_resized = Image.fromarray(heatmap_resized).resize(pil_img.size, Image.NEAREST)
-#     heatmap_resized = np.array(heatmap_resized)
-
-#     probs = result['probabilities'][0]
-#     prob_text = f"non-sexual: {probs[0]:.2f}, sexual: {probs[1]:.2f}"
-
-#     # -----------------------------
-#     # Plot everything in one figure
-#     # -----------------------------
-#     fig, ax = plt.subplots(figsize=(6,6))
-
-#     ax.imshow(pil_img)  # original image
-#     ax.imshow(heatmap_resized, cmap='jet', alpha=0.4, interpolation='nearest')  # overlay heatmap
-#     ax.axis('off')
-#     ax.set_title(f"{result['prediction']} ({prob_text})", fontsize=14, color='blue')
-
-#     # Add colorbar
-#     sm = plt.cm.ScalarMappable(cmap='jet', norm=plt.Normalize(vmin=0, vmax=1))
-#     sm.set_array([])
-#     cbar = fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
-#     cbar.set_label('Feature Intensity')
-
-#     plt.show()

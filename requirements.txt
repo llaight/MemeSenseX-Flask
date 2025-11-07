@@ -2,7 +2,6 @@ torch
 torchvision
 transformers
 Pillow
-matplotlib
 easyocr
 numpy
 opencv-python
