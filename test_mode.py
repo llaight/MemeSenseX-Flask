@@ -19,7 +19,7 @@ from huggingface_hub import hf_hub_download
 # Download model from Hugging Face private repo
 MODEL_PATH = hf_hub_download(
     repo_id="llaight/memesensex-model",        # your repo ID
-    filename="best_multimodal_v4.pth",       # exact file name
+    filename="best_multimodal_v3.pth",       # exact file name
 )
 
 # =========================
